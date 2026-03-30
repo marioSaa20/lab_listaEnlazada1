@@ -35,7 +35,11 @@ Node * createNode(void * data) {
 // Recuerda reservar memoria al puntero usando malloc o calloc.
 
 List * createList() {
-     return NULL;
+    List *list = (List*)malloc(sizeof(List));
+    list->head = NULL;
+    list->tail = 0;
+    list->current = NULL;
+    return list;
 }
 
 // 2. Programe las funciones void * firstList(List * list) y void * nextList(List * list).
@@ -43,11 +47,15 @@ List * createList() {
 //   - La segunda función retorna el dato del nodo a continuación del current y actualiza el current para que apunte a ese nodo.
 
 void * firstList(List * list) {
+    list->current = list->head;
+    if(list->current) return list->current->data;
     return NULL;
 }
 
 void * nextList(List * list) {
-    return NULL;
+    if (list->current == NULL || list->current->next == NULL) return NULL;
+    list->current = list->current->next;
+    return list->current->data;
 }
 
 // 3. Programe las funciones void * lastList(List * list) y void * prevList(List * list).
@@ -55,17 +63,32 @@ void * nextList(List * list) {
 //   - La segunda función retorna el dato del nodo anterior a current y actualiza el current para que apunte a ese nodo.
 
 void * lastList(List * list) {
-    return NULL;
+    if(list->current == NULL) return NULL;
+    list->current = list->tail;
+    return list->current->data;
 }
-
 void * prevList(List * list) {
-    return NULL;
+    if(list->current == NULL || list->current->prev == NULL) return NULL;
+    list->current = list->current->prev;
+    return list->current->data;
 }
 
 // 4. Programe la función void pushFront(List * list, void * data), la cual agrega un dato al comienzo de la lista.
 // Puede utilizar la función Node* createNode(void * data) la cual crea, incializa y retorna un nodo con el dato correspondiente.
 
 void pushFront(List * list, void * data) {
+    Node*nuevoNodo = (Node*)malloc(sizeof(Node));
+    nuevoNodo->data = data;
+    nuevoNodo->prev = NULL;
+    nuevoNodo->next = list->head;
+    if(list->head != NULL){
+        list->head->prev = nuevoNodo;
+    } else {
+        list->tail = nuevoNodo;
+    }
+    list->head = nuevoNodo;
+ 
+    
 }
 
 void pushBack(List * list, void * data) {
@@ -76,6 +99,18 @@ void pushBack(List * list, void * data) {
 // 5. Programe la función void pushCurrent(List * list, void* data), la cual agrega un dato a continuación del nodo apuntado por list->current.
 
 void pushCurrent(List * list, void * data) {
+    Node*nuevoNodo = (Node*)malloc(sizeof(Node));
+    nuevoNodo->data = data;
+    Node*izquierda= list->current;
+    Node*derecha = list->current->next;
+    nuevoNodo->prev = izquierda;
+    nuevoNodo->next = derecha;
+    izquierda->next = nuevoNodo;
+    if(derecha != NULL){
+        derecha->prev = nuevoNodo;
+    } else {
+        list->tail = nuevoNodo;
+    }
 }
 
 void * popFront(List * list) {
@@ -91,7 +126,32 @@ void * popBack(List * list) {
 // 6. Programe la función void* popCurrent(List * list), la cual elimina el nodo que está en la posición del current de la lista enlazada, y además retorna el dato del nodo eliminado.
 // Nota: El current debe quedar apuntando al nodo siguiente del eliminado.
 
-void * popCurrent(List * list) {
+void * popCurrent(List * list) { 
+    if(list->head == NULL) return NULL;
+    
+    void*dato = (void*)list->current->data;
+    Node*izquierda = list->current->prev;
+    Node*derecha = list->current->next;
+    
+    if(izquierda == NULL){
+        list->current = NULL;
+        list->head = derecha;
+        list->head->prev = NULL;
+        return dato;
+    }
+    if(derecha == NULL){
+        list->current = NULL;
+        list->tail = izquierda;
+        list->tail->next = NULL;
+        return dato;
+        
+    } else{
+        list->current = NULL;
+        izquierda->next = derecha;
+        derecha->prev = izquierda;
+        return dato;
+    }
+    free(list->current);  
     return NULL;
 }
 
@@ -100,3 +160,4 @@ void cleanList(List * list) {
         popFront(list);
     }
 }
+
